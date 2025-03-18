@@ -1,0 +1,196 @@
+Spring Boot Backend Requirements for Database Comparison Tool
+
+1. Project Setup
+---------------
+- Spring Boot 3.2.x
+- Java 17 or higher
+- Dependencies:
+  - spring-boot-starter-web
+  - spring-boot-starter-data-jpa
+  - spring-boot-starter-validation
+  - mysql-connector-java
+  - postgresql
+  - mssql-jdbc
+  - lombok
+  - springdoc-openapi-starter-webmvc-ui (for API documentation)
+
+2. API Endpoints
+---------------
+a) Database Connection (/api/connect)
+   - Method: POST
+   - Request Body:
+     {
+       "hostname": string,
+       "port": string,
+       "username": string,
+       "password": string,
+       "databaseType": string,
+       "databaseName": string
+     }
+   - Response:
+     {
+       "success": boolean,
+       "message": string
+     }
+
+b) Fetch Tables (/api/tables/{dbName})
+   - Method: GET
+   - Path Variable: dbName
+   - Response: string[] (list of table names)
+
+c) Fetch Columns (/api/columns/{tableName})
+   - Method: GET
+   - Path Variable: tableName
+   - Response: string[] (list of column names)
+
+d) Compare Tables (/api/compare)
+   - Method: POST
+   - Request Body:
+     {
+       "sourceTable": string,
+       "targetTable": string,
+       "columnMappings": [
+         {
+           "sourceColumn": string,
+           "targetColumn": string
+         }
+       ],
+       "skipColumns": string[],
+       "matchingAlgorithm": "exact" | "fuzzy",
+       "fuzzyThreshold": number,
+       "exportFormat": "json" | "excel" | "csv"
+     }
+   - Response:
+     [
+       {
+         "id": number,
+         "status": "matched" | "mismatched" | "missing_source" | "missing_target",
+         "differences": {
+           [columnName: string]: {
+             "sourceValue": string,
+             "targetValue": string
+           }
+         }
+       }
+     ]
+
+3. CORS Configuration
+--------------------
+- Enable CORS for frontend origin (http://localhost:5173)
+- Allow necessary HTTP methods (GET, POST)
+- Allow required headers
+
+4. Database Connection Management
+-------------------------------
+- Implement dynamic database connection creation
+- Support multiple concurrent database connections
+- Connection pooling for each database
+- Proper connection cleanup
+- Support for different database types:
+  - MySQL
+  - PostgreSQL
+  - SQL Server
+
+5. Security Requirements
+-----------------------
+- Input validation for all endpoints
+- SQL injection prevention
+- Secure password handling
+- Rate limiting for API endpoints
+- Proper error handling and logging
+
+6. Performance Considerations
+---------------------------
+- Implement pagination for large result sets
+- Optimize comparison algorithms
+- Use batch processing for large datasets
+- Implement caching where appropriate
+- Connection pooling optimization
+
+7. Error Handling
+----------------
+- Implement global exception handling
+- Provide detailed error messages
+- HTTP status codes:
+  400: Bad Request
+  401: Unauthorized
+  404: Not Found
+  500: Internal Server Error
+- Custom error responses:
+  {
+    "error": string,
+    "message": string,
+    "timestamp": string,
+    "path": string
+  }
+
+8. Logging Requirements
+----------------------
+- Request/Response logging
+- Error logging
+- Performance metrics logging
+- Connection status logging
+- Comparison operation logging
+
+9. Testing Requirements
+----------------------
+- Unit tests for services
+- Integration tests for controllers
+- Database connection tests
+- Comparison logic tests
+- Error handling tests
+
+10. Additional Features
+----------------------
+- Support for fuzzy matching using algorithms like Levenshtein distance
+- Export functionality (JSON, CSV, Excel)
+- Query timeout handling
+- Progress tracking for long-running comparisons
+- Connection health checks
+
+11. Environment Configuration
+---------------------------
+application.properties/application.yml:
+```
+server:
+  port: 8080
+  
+spring:
+  datasource:
+    # Dynamic datasource configuration
+  jpa:
+    open-in-view: false
+    
+logging:
+  level:
+    root: INFO
+    com.yourapp: DEBUG
+    
+app:
+  cors:
+    allowed-origins: http://localhost:5173
+  security:
+    rate-limit: 100
+  comparison:
+    batch-size: 1000
+    timeout-seconds: 300
+```
+
+12. Deployment Considerations
+---------------------------
+- Containerization support (Dockerfile)
+- Environment-specific configurations
+- Health check endpoints
+- Metrics endpoints
+- Resource requirements:
+  - Minimum 4GB RAM
+  - 2+ CPU cores
+  - Sufficient disk space for temporary data
+
+13. Documentation Requirements
+----------------------------
+- API documentation using OpenAPI/Swagger
+- Database schema documentation
+- Deployment guide
+- Configuration guide
+- Troubleshooting guide

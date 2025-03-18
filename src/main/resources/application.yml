@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    # Dynamic datasource configuration will be handled programmatically
+  jpa:
+    open-in-view: false
+    
+logging:
+  level:
+    root: INFO
+    com.dbcompare: DEBUG
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173
+  security:
+    rate-limit: 100
+  comparison:
+    batch-size: 1000
+    timeout-seconds: 300
